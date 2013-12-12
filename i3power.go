@@ -74,7 +74,7 @@ func main() {
 	for {
 		timeToEmpty = battery.getTimeToEmpty()
 
-		if timeToEmpty < options.time_action {
+		if timeToEmpty < options.time_action && timeToEmpty != 0.0 {
 			if execute {
 				cmd = exec.Command("sh", "-c", options.action)
 				cmd.Stdout = os.Stdout
