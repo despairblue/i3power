@@ -18,7 +18,8 @@ type Options struct {
 
 type UPower struct {
 	sysBusConn *dbus.Conn
-	battery    *dbus.Object
+	battery0   *dbus.Object
+	battery1   *dbus.Object
 }
 
 func (self *UPower) connect() {
@@ -27,14 +28,21 @@ func (self *UPower) connect() {
 	if e != nil {
 		panic(e)
 	}
-	self.battery = self.sysBusConn.Object("org.freedesktop.UPower", "/org/freedesktop/UPower/devices/battery_BAT0")
+	self.battery0 = self.sysBusConn.Object("org.freedesktop.UPower", "/org/freedesktop/UPower/devices/battery_BAT0")
+	self.battery1 = self.sysBusConn.Object("org.freedesktop.UPower", "/org/freedesktop/UPower/devices/battery_BAT1")
 }
 
 func (self *UPower) getTimeToEmpty() (timeToEmpty float64) {
-	v, e := self.battery.GetProperty("org.freedesktop.UPower.Device.TimeToEmpty")
+	v, e := self.battery0.GetProperty("org.freedesktop.UPower.Device.TimeToEmpty")
+
 	if e != nil {
-		panic(e)
+		v, e = self.battery1.GetProperty("org.freedesktop.UPower.Device.TimeToEmpty")
+
+		if e != nil {
+			panic(e)
+		}
 	}
+
 	switch v.Value().(type) {
 	case int32:
 		timeToEmpty = float64(v.Value().(int32)) / 60
